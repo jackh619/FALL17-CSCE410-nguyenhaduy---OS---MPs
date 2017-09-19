@@ -72,13 +72,22 @@ int main() {
                                   0,
                                   0);
     
+    Console::puti(KERNEL_POOL_START_FRAME); Console::puts("\n");
+    Console::puti(KERNEL_POOL_SIZE); Console::puts("\n");
+    Console::puti(PROCESS_POOL_START_FRAME); Console::puts("\n");
+    Console::puti(PROCESS_POOL_SIZE); Console::puts("\n");
+
 
     /* ---- PROCESS POOL -- */
 
-/*
+
     unsigned long n_info_frames = ContFramePool::needed_info_frames(PROCESS_POOL_SIZE);
+    Console::puts("n_info_frames = "); Console::puti(n_info_frames); Console::puts("\n");
+
 
     unsigned long process_mem_pool_info_frame = kernel_mem_pool.get_frames(n_info_frames);
+    Console::puts("process_mem_pool_info_frame = "); Console::puti(process_mem_pool_info_frame); Console::puts("\n");
+
     
     ContFramePool process_mem_pool(PROCESS_POOL_START_FRAME,
                                    PROCESS_POOL_SIZE,
@@ -86,17 +95,46 @@ int main() {
                                    n_info_frames);
     
     process_mem_pool.mark_inaccessible(MEM_HOLE_START_FRAME, MEM_HOLE_SIZE);
-*/
+
     /* -- MOST OF WHAT WE NEED IS SETUP. THE KERNEL CAN START. */
 
     Console::puts("Hello World!\n");
 
     /* -- TEST MEMORY ALLOCATOR */
     
-    test_memory(&kernel_mem_pool, 32);
+    // Console::puti(kernel_mem_pool.get_frames()); Console::puts("\n");
+    
+    test_memory(&kernel_mem_pool, 4);
 
     /* ---- Add code here to test the frame pool implementation. */
-    
+    Console::puti(process_mem_pool.get_frames(129)); Console::puts("\n");
+    Console::puti(process_mem_pool.get_frames(247)); Console::puts("\n");
+    Console::puti(process_mem_pool.get_frames(373)); Console::puts("\n");
+    Console::puti(process_mem_pool.get_frames(765)); Console::puts("\n");
+    process_mem_pool.release_frames(1153);
+    Console::puts("Relase_frames at 1153!\n");
+    Console::puti(process_mem_pool.get_frames(242)); Console::puts("\n");
+    process_mem_pool.release_frames(1400);
+    Console::puts("Relase_frames at 1400!\n");
+    Console::puti(process_mem_pool.get_frames(370)); Console::puts("\n");
+    Console::puti(process_mem_pool.get_frames(3)); Console::puts("\n");
+    Console::puti(process_mem_pool.get_frames(3)); Console::puts("\n");
+    Console::puti(process_mem_pool.get_frames(10)); Console::puts("\n");
+    // process_mem_pool.release_frames(2538);
+    // Console::puts("Relase_frames at 2538!\n");
+    // process_mem_pool.release_frames(1768);
+    // Console::puts("Relase_frames at 1768!\n");
+    // process_mem_pool.release_frames(1395);
+    // Console::puts("Relase_frames at 1395!\n");
+    // process_mem_pool.release_frames(1773);
+    // Console::puts("Relase_frames at 1773!\n");
+    // process_mem_pool.release_frames(1024);
+    // Console::puts("Relase_frames at 1024!\n");
+    // Console::puti(process_mem_pool.get_frames(129)); Console::puts("\n");
+    // process_mem_pool.release_frames(1024);
+    // Console::puts("Relase_frames at 1024!\n");
+
+
     /* -- NOW LOOP FOREVER */
     Console::puts("Testing is DONE. We will do nothing forever\n");
     Console::puts("Feel free to turn off the machine now.\n");

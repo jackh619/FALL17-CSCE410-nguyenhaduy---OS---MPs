@@ -48,8 +48,6 @@ private:
     unsigned long   nframes;       // Size of the frame pool
     unsigned long   info_frame_no; // Where do we store the management information?
     
-    void mark_inaccessible(unsigned long _frame_no);
-
 public:
 
     static const unsigned int FRAME_SIZE = Machine::PAGE_SIZE;
