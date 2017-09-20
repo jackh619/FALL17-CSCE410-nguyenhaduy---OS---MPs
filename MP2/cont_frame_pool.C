@@ -150,11 +150,10 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
     // If _info_frame_no is zero then we keep management info in the first
     //frame, else we use the provided frame to keep management info
     if(info_frame_no == 0) {
-        bitmap = (unsigned char *) (base_frame_no *2* FRAME_SIZE);       
+        bitmap = (unsigned char *) (base_frame_no * FRAME_SIZE);       
         nFreeFrames -= 1;
     } else {
-        bitmap = (unsigned char *) (info_frame_no *2* FRAME_SIZE);
-        nFreeFrames -= n_info_frames;
+        bitmap = (unsigned char *) (info_frame_no * FRAME_SIZE);
     }
     
     // Number of frames must be "fill" the bitmap!
@@ -169,29 +168,7 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
     // Mark the first frame as HEAD_OF_SEQUENCE(01)
     if (info_frame_no == 0){
         unsigned char mask1 = 0x40;	//HEAD_OF_SEQUENCE(01)
-        // unsigned char mask2 = 0xC0;	//ALLOCATED(11)
-        // for (int j = 1; j <= (info_frame_no % 4); j++) {
-        // 	mask1 = mask1 >> 2;
-        // 	mask2 = mask2 >> 2;
-        // }
         bitmap[info_frame_no / 4] = bitmap[info_frame_no / 4] | mask1;
-
-
-        // //Set the following frames to ALLOCATED(11)
-        // if (n_info_frames != 0){
-        //     unsigned long infor_end_frame = info_frame_no + n_info_frames -1;
-        //     mask2 = mask2 >> 2;
-        //     for (int i = info_frame_no +1; i <= infor_end_frame; i++) {
-        //         if (mask2 == 0x0){
-        //             mask2 = 0xC0;
-        //         }
-        //     	bitmap[i / 4] = bitmap[i / 4] | mask2;
-        //     	mask2 = mask2 >> 2;
-        //     }
-        //     nFreeFrames -= n_info_frames;
-        // } else {
-        //     nFreeFrames -= 1;
-        // }
     }
     
     Console::puts("Contiguous Frame Pool initialized\n");
@@ -202,13 +179,10 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
     // Any frames left to allocate?
     assert(_n_frames > 0);
 
+    // If not enough space, return 0
     if (nFreeFrames < _n_frames) 
         return 0;
     
-    // Console::puts("bitmap[i] = "); Console::puti(bitmap[0]); Console::puts("\n");
-
-    // Find a frame that is not being used and return its frame index.
-    // Mark that frame as being used in the bitmap.
     unsigned int first_frame_no = base_frame_no;
     unsigned int virtual_frame_no = 0;
     unsigned char check_mask = 0xC0;
@@ -224,15 +198,15 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 
     		available_frames = 1;
     		unsigned int frame_count = 0;
-            unsigned char check_mask2 = check_mask >> 2;
 
             // Check if the next frames are free
     		for (int j = 0; j < _n_frames; j++){ 
-    		    if ( j%4 == 0){
+                unsigned char check_mask2 = check_mask >> 2;
+    		    if ( check_mask2 == 0x0){
     		        check_mask2 = 0xC0;
     		        frame_count ++;
     		    }
-    		    if ((bitmap[i + 1 + (frame_count / 4)] & check_mask2) == 0x0){
+    		    if ((bitmap[i + ((offset + frame_count) / 4)] & check_mask2) == 0x0){
     		        check_mask2 = check_mask2 >> 2;
     		        available_frames++;
     		    } else {
@@ -251,20 +225,13 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
                 i++;
             }
         }
-        // Console::puts("check_mask = "); Console::puti(check_mask); Console::puts("\n");
-
     }    
 
     virtual_frame_no = i * 4 + offset;
     first_frame_no += virtual_frame_no;
     
-    unsigned char mask1 = 0x40;	//HEAD_OF_SEQUENCE(01)
-    unsigned char mask2 = 0xC0; //ALLOCATED(11)
-
-    for (int i = 0; i < offset; i++){
-        mask1 = mask1 >> 2;
-        mask2 = mask2 >> 2;
-    }
+    unsigned char mask1 = 0x40 >> 2 * offset;	//HEAD_OF_SEQUENCE(01)
+    unsigned char mask2 = 0xC0 >> 2 * offset;   //ALLOCATED(11)
 
     // Mark the first frame as HEAD_OF_SEQUENCE(01)
     bitmap[i] = bitmap[i] | mask1;
@@ -286,124 +253,63 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 void ContFramePool::mark_inaccessible(unsigned long _base_frame_no,
                                       unsigned long _n_frames)
 {
-    // // Mark all frames in the range as being used.
-    // int frame_no ;
-    // for(frame_no = _base_frame_no; frame_no < _base_frame_no + _n_frames; frame_no++){
-    //     // Let's first do a range check.
-    // 	assert ((frame_no >= base_frame_no) && (frame_no < base_frame_no + n_frames));
+    // Mark the first frame as HEAD_OF_SEQUENCE(01)
+    unsigned char mask1 =  0x40 >> 2*(_base_frame_no % 4);
+    bitmap[(_base_frame_no - base_frame_no)/4] |= mask1;
+
+    //Set the following frames to ALLOCATED(11) 
+    unsigned char mask2 = 0xC0 >> 2*(_base_frame_no % 4);
+    for(int j = _base_frame_no + 1; j < _base_frame_no + _n_frames; j++){
+        // Let's first do a range check.
+    	assert ((j >= base_frame_no) && (j < base_frame_no + n_frames));
     
-    // 	unsigned int bitmap_index = (frame_no - base_frame_no) / 8;
-    // 	unsigned char mask = 0x80 >> ((frame_no - base_frame_no) % 8);
-    
-    // 	// Is the frame being used already?
-    // 	assert((bitmap[bitmap_index] & mask) != 0);
-    
-    // 	// Update bitmap
-    // 	bitmap[bitmap_index] ^= mask;
-    // 	nFreeFrames--;
-    // }
-    // nFreeFrames -= _n_frames;
+    	mask2 = mask2 >> 2;
+        if (mask2 == 0x0){
+            mask2 = 0xC0;
+        }
+        bitmap[(j - base_frame_no)/ 4] = bitmap[(j - base_frame_no) / 4] | mask2;
+    }
+    nFreeFrames -= _n_frames;
 }
 
 void ContFramePool::release_frames(unsigned long _first_frame_no)
 {
-// #ifdef JUST_AS_EXAMPLE
-    
-    // Console::puts("pool_list->n_frames + pool_list->base_frame_no = "); 
-    // Console::puti(pool_list[0]->n_frames + pool_list[0]->base_frame_no); Console::puts("\n");
-
-    // unsigned int bitmap_index;
     unsigned int pool_index = 0;
+    // If first_frame is greater than kernel mem pool limit, it belong to process mem pool
     if (_first_frame_no >= (pool_list[0]->n_frames + pool_list[0]->base_frame_no)){
         pool_index = 1;
     }
-    unsigned int bitmap_index = (_first_frame_no - pool_list[pool_index]->base_frame_no) / 4;
-    Console::puts("_first_frame_no = "); Console::puti(_first_frame_no); Console::puts("\n");
-    // Console::puts("base_frame_no = "); Console::puti(pool_list[pool_index]->base_frame_no); Console::puts("\n");
-    // Console::puts("bitmap_index = "); Console::puti(bitmap_index); Console::puts("\n");
-
-
-
-
-    // unsigned char * bitmap; 
-    // if (_first_frame_no >= (pool_list->n_frames + pool_list->base_frame_no)){
-    //     bitmap_index = (_first_frame_no - (pool_list->base_frame_no + pool_list->n_frames))/4;
-    //     bitmap = (unsigned char *) (pool_list->base_frame_no *2* FRAME_SIZE);
-    // } else {
-    //     bitmap_index = (_first_frame_no - pool_list->base_frame_no) / 4;
-    //     bitmap = (unsigned char *) ((pool_list->base_frame_no + pool_list->n_frames) *2* FRAME_SIZE);
-    // }
-
-    // Console::puts("bitmap_index = "); Console::puti(bitmap_index); Console::puts("\n");
-    // Console::puts("bitmap1 = "); Console::puti(pool_list->bitmap[bitmap_index]); Console::puts("\n");
-
-
-    // unsigned char mask = 0x40 >> 2*(_first_frame_no % 4);
-    unsigned char mask = 0xC0 >> 2*(_first_frame_no % 4);
-    Console::puts("mask = "); Console::puti(mask); Console::puts("\n");
-    unsigned char head_bitmap = pool_list[pool_index]->bitmap[bitmap_index];
-    // Console::puts("mask = "); Console::puti(mask); Console::puts("\n");
-    Console::puts("bitmap1 = "); Console::puti(head_bitmap); Console::puts("\n");
-    Console::puts("_first_frame_no % 4 = "); Console::puti(_first_frame_no % 4); Console::puts("\n");
-
-    head_bitmap &= mask;
-    Console::puts("bitmap2 = "); Console::puti(head_bitmap); Console::puts("\n");
-
-    for (int i = 1; i < 4 - (_first_frame_no % 4); i++) {
-        head_bitmap = head_bitmap >> 2;
-    }
-
-    // head_bitmap = head_bitmap >> 2;
-
-    Console::puts("bitmap3 = "); Console::puti(head_bitmap); Console::puts("\n");
-    // Console::puts("bitmap2 = "); Console::puti(pool_list[pool_index]->bitmap[bitmap_index-1]); Console::puts("\n");
-    // Console::puts("bitmap3 = "); Console::puti(pool_list[pool_index]->bitmap[bitmap_index-1]); Console::puts("\n");
-
     
-    if(head_bitmap != 0x01) {
+    unsigned int bitmap_index = (_first_frame_no - pool_list[pool_index]->base_frame_no) / 4;
+    unsigned char mask = 0xC0 >> 2*(_first_frame_no % 4);
+    unsigned char head_bitmap = pool_list[pool_index]->bitmap[bitmap_index];
+    head_bitmap &= mask;
+    head_bitmap = head_bitmap << 2*(_first_frame_no % 4);
+
+    if(head_bitmap != 0x40) {
         Console::puts("Error, Frame being released is not HEAD_OF_SEQUENCE\n");
         assert(false);
     }
-
-    
-
-    // Console::puts("bitmap1 = "); Console::puti(pool_list[pool_index]->bitmap[bitmap_index]); Console::puts("\n");
 
     // Release first frame
     pool_list[pool_index]->bitmap[bitmap_index] &= ~mask;    
     pool_list[pool_index]->nFreeFrames++;
 
-    // Console::puts("bitmap2 = "); Console::puti(pool_list[pool_index]->bitmap[bitmap_index]); Console::puts("\n");
-
-    mask = 0xC0 >> 2*(_first_frame_no % 4);    
-
     // Release next frames in the queue
     do {
-        // Console::puts("bitmap3 = "); Console::puti(pool_list[pool_index]->bitmap[bitmap_index]); Console::puts("\n");
         mask = mask >>2;
         if (mask == 0x0){
             mask = 0xC0;
             bitmap_index ++;
-            // Console::puts("bitmap_index = "); Console::puti(pool_list[pool_index]->bitmap[bitmap_index]); Console::puts("\n");
-
-        }
-        if (pool_list[pool_index]->bitmap[bitmap_index] & mask != 0x0){
+        }        
+        // Check if the frame is ALLOCATED
+        if ((~pool_list[pool_index]->bitmap[bitmap_index] & mask) == 0x00){
             pool_list[pool_index]->bitmap[bitmap_index] &= ~mask;
             pool_list[pool_index]->nFreeFrames++;
-            Console::puts("bitmap4 = "); Console::puti(pool_list[pool_index]->bitmap[bitmap_index]); Console::puts("\n");
 
-        } else {
-            // Console::puts("bitmap3 = "); Console::puti(pool_list[pool_index]->bitmap[bitmap_index]); Console::puts("\n");
-            Console::puts("end_bitmap_index = "); Console::puti(bitmap_index); Console::puts("\n");
-            Console::puts("bitmap4 = "); Console::puti(pool_list[pool_index]->bitmap[bitmap_index-1]); Console::puts("\n");
-
-            break;
-        }
+        } else {break;}
     } while(true);
 
-    // Console::puts("Finished releasing frames\n");
-
-// #endif
 }
 
 unsigned long ContFramePool::needed_info_frames(unsigned long _n_frames)

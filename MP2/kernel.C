@@ -104,7 +104,7 @@ int main() {
     
     // Console::puti(kernel_mem_pool.get_frames()); Console::puts("\n");
     
-    test_memory(&kernel_mem_pool, 4);
+    test_memory(&kernel_mem_pool, 32);
 
     /* ---- Add code here to test the frame pool implementation. */
     Console::puti(process_mem_pool.get_frames(129)); Console::puts("\n");
@@ -112,28 +112,41 @@ int main() {
     Console::puti(process_mem_pool.get_frames(373)); Console::puts("\n");
     Console::puti(process_mem_pool.get_frames(765)); Console::puts("\n");
     process_mem_pool.release_frames(1153);
-    Console::puts("Relase_frames at 1153!\n");
+    Console::puts("Release frames at 1153!\n");
     Console::puti(process_mem_pool.get_frames(242)); Console::puts("\n");
     process_mem_pool.release_frames(1400);
-    Console::puts("Relase_frames at 1400!\n");
+    Console::puts("Release frames at 1400!\n");
     Console::puti(process_mem_pool.get_frames(370)); Console::puts("\n");
     Console::puti(process_mem_pool.get_frames(3)); Console::puts("\n");
     Console::puti(process_mem_pool.get_frames(3)); Console::puts("\n");
     Console::puti(process_mem_pool.get_frames(10)); Console::puts("\n");
-    // process_mem_pool.release_frames(2538);
-    // Console::puts("Relase_frames at 2538!\n");
-    // process_mem_pool.release_frames(1768);
-    // Console::puts("Relase_frames at 1768!\n");
-    // process_mem_pool.release_frames(1395);
-    // Console::puts("Relase_frames at 1395!\n");
-    // process_mem_pool.release_frames(1773);
-    // Console::puts("Relase_frames at 1773!\n");
-    // process_mem_pool.release_frames(1024);
-    // Console::puts("Relase_frames at 1024!\n");
-    // Console::puti(process_mem_pool.get_frames(129)); Console::puts("\n");
-    // process_mem_pool.release_frames(1024);
-    // Console::puts("Relase_frames at 1024!\n");
+    process_mem_pool.release_frames(2538);
+    Console::puts("Release frames at 2538!\n");
+    process_mem_pool.release_frames(1768);
+    Console::puts("Release frames at 1768!\n");    
+    process_mem_pool.release_frames(1765);
+    Console::puts("Release frames at 1765!\n");
+    process_mem_pool.release_frames(1395);
+    Console::puts("Release frames at 1395!\n");
+    process_mem_pool.release_frames(1153);
+    Console::puts("Release frames at 1153!\n");
+    process_mem_pool.release_frames(1773);
+    Console::puts("Release frames at 1773!\n");
+    process_mem_pool.release_frames(1024);
+    Console::puts("Release frames at 1024!\n");
+    Console::puti(process_mem_pool.get_frames(129)); Console::puts("\n");
+    process_mem_pool.release_frames(1024);
+    Console::puts("Release frames at 1024!\n");
 
+    for (int i = 0; i< MEM_HOLE_START_FRAME - PROCESS_POOL_START_FRAME; i+=(0x1 << 8)){
+        Console::puti(process_mem_pool.get_frames(0x1 << 8)); Console::puts("\n");        
+    }
+
+    for(int i = 0; i< PROCESS_POOL_START_FRAME + PROCESS_POOL_SIZE - MEM_HOLE_START_FRAME - MEM_HOLE_SIZE; i+=(0x1 << 8)) {
+        Console::puti(process_mem_pool.get_frames(0x1 << 8)); Console::puts("\n");        
+    }
+
+    Console::puti(process_mem_pool.get_frames(10)); Console::puts("\n");
 
     /* -- NOW LOOP FOREVER */
     Console::puts("Testing is DONE. We will do nothing forever\n");
