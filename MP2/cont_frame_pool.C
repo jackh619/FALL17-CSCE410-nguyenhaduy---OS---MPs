@@ -314,5 +314,5 @@ void ContFramePool::release_frames(unsigned long _first_frame_no)
 
 unsigned long ContFramePool::needed_info_frames(unsigned long _n_frames)
 {
-    return _n_frames / (16*FRAME_SIZE) + (_n_frames % (16*FRAME_SIZE) > 0 ? 1 : 0); //Round up
+    return _n_frames / (4*FRAME_SIZE) + (_n_frames % (4*FRAME_SIZE) > 0 ? 1 : 0); //Round up
 }
