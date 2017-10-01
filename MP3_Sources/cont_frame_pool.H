@@ -42,19 +42,11 @@ class ContFramePool {
     
 private:
     /* -- DEFINE YOUR CONT FRAME POOL DATA STRUCTURE(s) HERE. */
-    unsigned char * bitmap;        // We implement the simple frame pool with a bitmap
-    unsigned int  nFreeFrames;   //
-    unsigned long base_frame_no; // start frame of pool
-    unsigned long n_frames; // number of frames under management
-    unsigned long info_frame_no; // if 0 can choose any frame from pool
-    unsigned long n_info_frames; // number of consecutive frames store the management information
-
+    
 public:
 
-    // The frame size is the same as the page size
-    static const unsigned int FRAME_SIZE = Machine::PAGE_SIZE;
-    static ContFramePool** pool_list;
-    static unsigned int number_of_pool;
+    // The frame size is the same as the page size, duh...    
+    static const unsigned int FRAME_SIZE = Machine::PAGE_SIZE; 
 
     ContFramePool(unsigned long _base_frame_no,
                   unsigned long _n_frames,
@@ -65,7 +57,7 @@ public:
      frame pool.
      _base_frame_no: Number of first frame managed by this frame pool.
      _n_frames: Size, in frames, of this frame pool.
-     EXAMPLE: If _base_frame_no is 16 and _n_frames is 4, this frame pool manages
+     EXAMPLE: If _base_frame_no is 16 and _nframes is 4, this frame pool manages
      physical frames numbered 16, 17, 18 and 19.
      _info_frame_no: Number of the first frame that should be used to store the
      management information for the frame pool.
