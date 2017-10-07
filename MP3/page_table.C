@@ -26,7 +26,7 @@ PageTable::PageTable()
 {
     //Only initialize if there is no page directory
     if (page_directory == NULL){
-      //put the page_directory in kernel_mem_pool
+      //Put the page_directory in kernel_mem_pool
       page_directory = ( unsigned long*)(kernel_mem_pool->get_frames(1)*PAGE_SIZE); 
       
 
