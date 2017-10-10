@@ -117,9 +117,25 @@ void PageTable::handle_fault(REGS * _r)
 }
 
 void PageTable::free_page(unsigned long _page_no) {
-	unsigned long directory_index = _page_no >> 22;
-	unsigned long page_index = (_page_no >> 12) & 0x3FF;
-	unsigned long* page_table = (unsigned long*)(0xFFC00000 | (directory_index << 12));
+	unsigned long directory_index = _page_no / (ENTRIES_PER_PAGE*PAGE_SIZE);
+	unsigned long page_index = (_page_no / PAGE_SIZE) & 0x3FF;
+	unsigned long* page_table = (unsigned long*)(0xFFC00000 | (directory_index * PAGE_SIZE));
 	unsigned long frame_number = page_table[page_index];
 	process_mem_pool->release_frame(frame_number);
+}
+
+void PageTable::register_vmpool (VMPool *_pool) {
+	int index = -1;
+	for (unsigned int i = 0, v < VM_ARRAY_SIZE; ++i) {
+		if (vmpool_array[i] == NULL) {
+			index = i;
+		}
+	}
+	if (index >= 0) {
+		vmpool_array[index] = _pool;
+		Console::puts("Register Virtual Memory Pool successfull! \n");
+	} else {
+		Console::puts("ERROR: Failed to register Virtual Memory Pool. Array is full! \n);
+	}
+	
 }
