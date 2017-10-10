@@ -26,6 +26,7 @@
 #include "machine.H"
 #include "exceptions.H"
 #include "cont_frame_pool.H"
+#include "vm_pool.H"
 
 /*--------------------------------------------------------------------------*/
 /* FORWARDS */
@@ -50,11 +51,12 @@ private:
 
   /* DATA FOR CURRENT PAGE TABLE */
   unsigned long        * page_directory;     /* where is page directory located? */
+  VMPool 			   * vmpool_array[VM_ARRAY_SIZE];
 
 public:
   static const unsigned int PAGE_SIZE        = Machine::PAGE_SIZE; 
   /* in bytes */
-  static const unsigned int ENTRIES_PER_PAGE = Machine::PT_ENTRIES_PER_PAGE; 
+  static const unsigned int ENTRIES_PER_PAGE = Machine::PT_ENTRIES_PER_PAGE;
   /* in entries, duh! */
 
   static void init_paging(ContFramePool * _kernel_mem_pool,
@@ -84,6 +86,15 @@ public:
 
   static void handle_fault(REGS * _r);
   /* The page fault handler. */
+
+  void free_page(unsigned long _page_no)
+  /* If the page is valid, the page table releases the frame and marks the page 
+     invalid. */
+
+  void register_vmpool(VMPool *_pool);
+  /* Add support for region check in page fault handler. Whenever a page fault 
+     happens, check with registered pools to see whether the address is 
+     legitimate.*/
 
 };
 

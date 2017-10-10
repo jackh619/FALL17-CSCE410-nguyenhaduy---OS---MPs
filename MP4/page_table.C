@@ -116,3 +116,10 @@ void PageTable::handle_fault(REGS * _r)
     Console::puts("handled page fault\n");
 }
 
+void PageTable::free_page(unsigned long _page_no) {
+	unsigned long directory_index = _page_no >> 22;
+	unsigned long page_index = (_page_no >> 12) & 0x3FF;
+	unsigned long* page_table = (unsigned long*)(0xFFC00000 | (directory_index << 12));
+	unsigned long frame_number = page_table[page_index];
+	process_mem_pool->release_frame(frame_number);
+}
