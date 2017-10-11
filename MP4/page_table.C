@@ -91,6 +91,19 @@ void PageTable::handle_fault(REGS * _r)
       unsigned long page_tab_index = (memory_addr / PAGE_SIZE) & 0x3FF;
       unsigned long page_dir_index = memory_addr / (ENTRIES_PER_PAGE*PAGE_SIZE);
 
+      VMPool** VMPool_Array = current_page_table->vmpool_array;
+      unsigned int VM_Index = 0;
+
+      for (unsigned int i = 0; i < VM_ARRAY_SIZE; ++i) {
+      	if (VMPool_Array[i]!=NULL) && (VMPool_Array[i]->islegitimate(memory_addr)) {
+      		VM_Index = i;
+      		break;
+      	}
+      }
+
+      if (VM_Index == 0)
+      	Console::puts("ADDRESS INVALID!!!\n");
+
       //If the 2nd level page_table is in memory
       if(page_dir[page_dir_index] & 0x1 == 0x1) {  
         //Get page table from page directory
