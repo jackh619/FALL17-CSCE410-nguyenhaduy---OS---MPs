@@ -53,6 +53,9 @@ VMPool::VMPool(unsigned long  _base_address,
     size = _size;
     frame_pool = _frame_pool;
     page_table = _page_table;
+    region_no = 0;
+
+    page_table->register_vmpool(this);
     Console::puts("Constructed VMPool object.\n");
 }
 

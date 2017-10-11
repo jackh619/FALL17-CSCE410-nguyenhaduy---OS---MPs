@@ -46,6 +46,7 @@ private:
 	unsigned long size;
 	ContFramePool *frame_pool;
 	PageTable 	  *page_table;
+	unsigned long region_no;
 
 public:
    VMPool(unsigned long  _base_address,
