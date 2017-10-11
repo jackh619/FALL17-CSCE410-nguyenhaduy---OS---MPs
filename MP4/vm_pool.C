@@ -71,6 +71,10 @@ void VMPool::release(unsigned long _start_address) {
 
 bool VMPool::is_legitimate(unsigned long _address) {
     assert(false);
+    if (_address > (base_address +size)) || (_address < base_address) {
+    	return false;
+    }
+    return true;
     Console::puts("Checked whether address is part of an allocated region.\n");
 }
 
