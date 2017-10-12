@@ -88,28 +88,28 @@ unsigned long VMPool::allocate(unsigned long _size) {
 	}
 
     // Address of region
-    unsigned long region_address;
+    unsigned long current_region_address;
 
     // If this is the first region, first region address is the base address
     if (total_regions == 0) {
-    	region_address = base_address;
+    	current_region_address = base_address;
     }
 
     else {
     	unsigned long last_index = total_regions - 1;
-    	region_address = region_descrpitors_list[last_index].region_address + region_descrpitors_list[last_index].length/4;
+    	current_region_address = region_descrpitors_list[last_index].region_address + region_descrpitors_list[last_index].length;
     }
 
     unsigned long current_index = total_regions;
 
-    region_descrpitors_list[current_index].region_address = region_address;
+    region_descrpitors_list[current_index].region_address = current_region_address;
     region_descrpitors_list[current_index].length = _size;
 
     total_regions++;
     total_regions_size += _size;
 
-    return base_address;
     Console::puts("Allocated region of memory.\n");
+    return current_region_address;
 }
 
 void VMPool::release(unsigned long _start_address) {
@@ -123,7 +123,7 @@ void VMPool::release(unsigned long _start_address) {
     	}
     }
 
-    unsigned long end_address = _start_address + region_descrpitors_list[region_index].length/4;
+    unsigned long end_address = _start_address + region_descrpitors_list[region_index].length;
     unsigned long release_address = _start_address;
     while (release_address < end_address) {
     	page_table->free_page(release_address);
@@ -153,8 +153,8 @@ bool VMPool::is_legitimate(unsigned long _address) {
 
     for (unsigned long i = 0; i < total_regions; i++) {
     	min_address = region_descrpitors_list[i].region_address;
-    	max_address = min_address + region_descrpitors_list[i].length/4;
-	    if ((_address > (min_address)) && (_address < max_address)) {
+    	max_address = min_address + region_descrpitors_list[i].length;
+	    if ((_address >= (min_address)) && (_address <= max_address)) {
 	    	return true;
 	    }
 	}

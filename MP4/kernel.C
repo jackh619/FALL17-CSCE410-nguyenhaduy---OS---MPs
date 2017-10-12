@@ -272,8 +272,11 @@ void GenerateVMPoolMemoryReferences(VMPool *pool, int size1, int size2) {
    for(int i=1; i<size1; i++) {
       int *arr = new int[size2 * i];
       if(pool->is_legitimate((unsigned long)arr) == false) {
-         TestFailed();
+        Console::puts("Failed first test...\n");
+        TestFailed();
       }
+      Console::puts("Passed first test...\n");
+
       for(int j=0; j<size2*i; j++) {
          arr[j] = j;
       }
