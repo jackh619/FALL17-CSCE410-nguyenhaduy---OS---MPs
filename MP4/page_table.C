@@ -152,7 +152,7 @@ void PageTable::handle_fault(REGS * _r)
 }
 
 void PageTable::free_page (unsigned long _page_no) {
-    assert(false);
+    // assert(false);
 	// _page_no is a logical address (virtual address)
 	// Get frame number from a logical address
 	unsigned long page_dir_index = _page_no / (ENTRIES_PER_PAGE*PAGE_SIZE);
@@ -169,7 +169,7 @@ void PageTable::free_page (unsigned long _page_no) {
 }
 
 void PageTable::register_pool (VMPool *_pool) {
-    assert(false);
+    // assert(false);
 	int VM_Pools_Index = -1;
 	for (unsigned int i = 0; i < 16; ++i) {
 		if (VM_Pools[i] == NULL) {

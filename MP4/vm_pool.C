@@ -70,7 +70,7 @@ VMPool::VMPool(unsigned long  _base_address,
 }
 
 unsigned long VMPool::allocate(unsigned long _size) {
-    assert(false);
+    // assert(false);
 
     // If size is zero, do not allocate virtual memory pool
     if (_size == 0) {
@@ -113,7 +113,7 @@ unsigned long VMPool::allocate(unsigned long _size) {
 }
 
 void VMPool::release(unsigned long _start_address) {
-    assert(false);
+    // assert(false);
     unsigned long region_index;
 
     for (unsigned long i; i < total_regions; ++i) {
@@ -148,10 +148,17 @@ void VMPool::release(unsigned long _start_address) {
 
 bool VMPool::is_legitimate(unsigned long _address) {
     // assert(false);
-    if ((_address > (base_address +size)) || (_address < base_address)) {
-    	return false;
-    }
-    return true;
+
+    unsigned long min_address, max_address;
+
+    for (unsigned long i = 0; i < total_regions; i++) {
+    	min_address = region_descrpitors_list[i].region_address;
+    	max_address = min_address + region_descrpitors_list[i].length/4;
+	    if ((_address > (min_address)) && (_address < max_address)) {
+	    	return true;
+	    }
+	}
+    return false;
     Console::puts("Checked whether address is part of an allocated region.\n");
 }
 
