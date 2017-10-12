@@ -32,6 +32,12 @@
 /* DATA STRUCTURES */
 /*--------------------------------------------------------------------------*/
 
+// Information of a region
+struct Region_Descriptors {
+	unsigned long region_address;
+	unsigned long length; // In bytes
+};
+
 /* Forward declaration of class PageTable */
 /* We need this to break a circular include sequence. */
 class PageTable;
@@ -47,7 +53,13 @@ private:
 	unsigned long size;
 	ContFramePool *frame_pool;
 	PageTable 	  *page_table;
-	unsigned long region_no;
+	unsigned long total_regions; // Number of allocated regions
+	unsigned long total_regions_size;
+
+	// Information of allocated regions
+	Region_Descriptors* region_descrpitors_list;
+
+	static const unsigned long MAX_REGIONS = 512; // Maximum number of regions allowed
 
 public:
    VMPool(unsigned long  _base_address,

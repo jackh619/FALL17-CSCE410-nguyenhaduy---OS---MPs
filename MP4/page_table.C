@@ -107,21 +107,21 @@ void PageTable::handle_fault(REGS * _r)
       unsigned long page_tab_index = (memory_addr / PAGE_SIZE) & 0x3FF;
       unsigned long page_dir_index = memory_addr / (ENTRIES_PER_PAGE*PAGE_SIZE);
 
-      // VMPool** VMPool_Array = current_page_table->VM_Pools;
-      // unsigned int VM_Index = -1;
+      VMPool** VMPool_Array = current_page_table->VM_Pools;
+      unsigned int VM_Index = -1;
 
-      // for (unsigned int i = 0; i < 16; ++i) {
-      // 	if ((VMPool_Array[i]!=NULL) && (VMPool_Array[i]->is_legitimate(memory_addr))) {
-      // 		VM_Index = i;
-      // 		break;
-      // 	}
-      // }
+      for (unsigned int i = 0; i < 16; ++i) {
+      	if ((VMPool_Array[i]!=NULL) && (VMPool_Array[i]->is_legitimate(memory_addr))) {
+      		VM_Index = i;
+      		break;
+      	}
+      }
 
-      // // If the address is not legitimate in any pools
-      // if (VM_Index == -1) {
-      // 	Console::puts("Address is invalid!!!\n");
-      // 	// return;
-      // }
+      // If the address is not legitimate in any pools
+      if (VM_Index == -1) {
+      	Console::puts("Address is invalid!!!\n");
+      	// return;
+      }
 
 	    //If the 2nd level page_table is in memory
 	  if(page_dir[page_dir_index] & 0x1 == 0x1) {  
@@ -143,7 +143,7 @@ void PageTable::handle_fault(REGS * _r)
 	    }
 	  }
 
-	      //Load page and set to 'user', 'r&w', 'present' -> 011
+	      //Load page and set to 'user', 'r&w', 'present' -> 111
 	      page_table[page_tab_index] = (PageTable::process_mem_pool->get_frames(1)*PAGE_SIZE) | 0x7;
 
 	      Console::puts("Handled page fault\n");
