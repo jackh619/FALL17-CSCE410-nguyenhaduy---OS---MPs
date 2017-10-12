@@ -51,7 +51,7 @@ private:
 
   /* DATA FOR CURRENT PAGE TABLE */
   unsigned long        * page_directory;     /* where is page directory located? */
-  VMPool 			   * vmpool_array[VM_ARRAY_SIZE];
+  VMPool 			   * VM_Pools[16];
 
 public:
   static const unsigned int PAGE_SIZE        = Machine::PAGE_SIZE; 
@@ -87,14 +87,13 @@ public:
   static void handle_fault(REGS * _r);
   /* The page fault handler. */
 
-  void free_page(unsigned long _page_no)
-  /* If the page is valid, the page table releases the frame and marks the page 
-     invalid. */
-
-  void register_vmpool(VMPool *_pool);
-  /* Add support for region check in page fault handler. Whenever a page fault 
-     happens, check with registered pools to see whether the address is 
-     legitimate.*/
+    // -- NEW IN MP4
+    
+    void register_pool(VMPool * _vm_pool);
+    /* Register a virtual memory pool with the page table. */
+    
+    void free_page(unsigned long _page_no);
+    /* If page is valid, release frame and mark page invalid. */
 
 };
 

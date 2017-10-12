@@ -49,13 +49,13 @@ VMPool::VMPool(unsigned long  _base_address,
                ContFramePool *_frame_pool,
                PageTable     *_page_table) {
     assert(false);
-    base_address = _base_address;
-    size = _size;
-    frame_pool = _frame_pool;
-    page_table = _page_table;
-    region_no = 0;
+    // base_address = _base_address;
+    // size = _size;
+    // frame_pool = _frame_pool;
+    // page_table = _page_table;
+    // region_no = 0;
 
-    page_table->register_vmpool(this);
+    // page_table->register_pool(this);
     Console::puts("Constructed VMPool object.\n");
 }
 
@@ -71,10 +71,10 @@ void VMPool::release(unsigned long _start_address) {
 
 bool VMPool::is_legitimate(unsigned long _address) {
     assert(false);
-    if (_address > (base_address +size)) || (_address < base_address) {
-    	return false;
-    }
-    return true;
+    // if ((_address > (base_address +size)) || (_address < base_address)) {
+    // 	return false;
+    // }
+    // return true;
     Console::puts("Checked whether address is part of an allocated region.\n");
 }
 
