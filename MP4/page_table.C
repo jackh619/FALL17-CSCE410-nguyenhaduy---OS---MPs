@@ -34,12 +34,12 @@ PageTable::PageTable()
 
       //Direct mapped page_table
       //Get frame for kernel page table (first 4MB)
-      unsigned long *page_table = (unsigned long*)(process_mem_pool->get_frames(1)*PAGE_SIZE); 
+      unsigned long *page_table = (unsigned long*)(kernel_mem_pool->get_frames(1)*PAGE_SIZE); 
       unsigned long  memory_addr = 0;
 
       for (unsigned int i = 0; i < ENTRIES_PER_PAGE; i++){
-        //Set the page table to 'user', 'r&w', 'present' -> 011
-        page_table[i] = memory_addr | 0x7;
+        //Set the page table to 'kernel', 'r&w', 'present' -> 011
+        page_table[i] = memory_addr | 0x3;
         memory_addr += PAGE_SIZE;
       }
 
@@ -122,32 +122,32 @@ void PageTable::handle_fault(REGS * _r)
       // 	Console::puts("Address is invalid!!!\n");
       // 	// return;
       // }
-      // else {
-	      //If the 2nd level page_table is in memory
-	      if(page_dir[page_dir_index] & 0x1 == 0x1) {  
-	        //Get page table from page directory
-	        // page_table = (unsigned long *) ((page_dir[page_dir_index]) & 0xFFFFF000);
-	        page_table = (unsigned long *) ((page_dir_index*PAGE_SIZE) | 0xFFC00000);
-	      } 
-	      //If the 2nd level page_table is not loaded in memory
-	      else {  
-	        //Load page_table into memory
-	        page_dir[page_dir_index] = (unsigned long)((process_mem_pool->get_frames(1)*PAGE_SIZE) | 0x7);
-	        //Get address of new page table      
-	        // page_table = (unsigned long *)((page_dir[page_dir_index]) & 0xFFFFF000);
-	        page_table = (unsigned long *) ((page_dir_index*PAGE_SIZE) | 0xFFC00000);
 
-	        //Initialize all entry of the page table to empty
-	        for(unsigned int i = 0; i < ENTRIES_PER_PAGE; i++){
-	            page_table[i] = 0x0;
-	        }
-	      }
+	    //If the 2nd level page_table is in memory
+	  if(page_dir[page_dir_index] & 0x1 == 0x1) {  
+	    //Get page table from page directory
+	    page_table = (unsigned long *) ((page_dir[page_dir_index]) & 0xFFFFF000);
+	    // page_table = (unsigned long *) ((page_dir_index*PAGE_SIZE) | 0xFFC00000);
+	  } 
+	  //If the 2nd level page_table is not loaded in memory
+	  else {  
+	    //Get address of new page table      
+	    page_table = (unsigned long*)(kernel_mem_pool->get_frames(1)*PAGE_SIZE);
+	    //Load page_table into memory
+	    page_dir[page_dir_index] = (unsigned long)(page_table) | 0x3;
+	    // page_dir[page_dir_index] = (unsigneir_index*PAGE_SIZE) | 0xFFC00000);
+
+	    //Initialize all entry of the page table to empty
+	    for(unsigned int i = 0; i < ENTRIES_PER_PAGE; i++){
+	        page_table[i] = 0x0;
+	    }
+	  }
 
 	      //Load page and set to 'user', 'r&w', 'present' -> 011
 	      page_table[page_tab_index] = (PageTable::process_mem_pool->get_frames(1)*PAGE_SIZE) | 0x7;
 
 	      Console::puts("Handled page fault\n");
-	  // }
+	  
 	}	    
 }
 
