@@ -167,7 +167,7 @@ bool VMPool::is_legitimate(unsigned long _address) {
     // If an address is in the range of min and max addressed of a region, it is legitimate
     for (unsigned long i = 0; i < total_regions; i++) {
     	min_address = region_descrpitors_list[i].region_address;
-    	max_address = min_address + region_descrpitors_list[i].length;
+    	max_address = min_address + region_descrpitors_list[i].length - 1;
 	    if ((_address >= (min_address)) && (_address <= max_address)) {
 	    	return true;
 	    }
