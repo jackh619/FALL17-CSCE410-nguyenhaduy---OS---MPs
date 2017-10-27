@@ -136,14 +136,14 @@ void PageTable::handle_fault(REGS * _r)
 	  //If the 2nd level page_table is not loaded in memory
 	  else {  
 	    // Get address for new page table      
-	    page_dir[page_dir_index] = (unsigned long)(process_mem_pool->get_frames(1)*PAGE_SIZE);
+	    page_dir[page_dir_index] = (unsigned long)(process_mem_pool->get_frames(1)*PAGE_SIZE) | 0x7;
 	    // Get the page table logical address
 	    // page_table = (unsigned long *) ((page_dir[page_dir_index]) & 0xFFFFF000);
 	    page_table = (unsigned long *) ((page_dir_index*PAGE_SIZE) | 0xFFC00000);
 
 	    //Initialize all entry of the page table to empty
 	    for(unsigned int i = 0; i < ENTRIES_PER_PAGE; i++){
-	        page_table[i] = 0x2;
+	        page_table[i] = 0x6;
 	    }
 	  }
 
