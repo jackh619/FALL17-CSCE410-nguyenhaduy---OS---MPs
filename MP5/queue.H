@@ -91,6 +91,16 @@ public:
     if (size == 0) {
       return NULL;
     }
+    Node* temp = head;
+    head = head->next_node;
+    --size;
+    return temp;
+  }
+
+  Thread* front () {
+    if (size == 0) {
+      return NULL;
+    }
     return head;
   }
 }
