@@ -46,7 +46,7 @@
 /*--------------------------------------------------------------------------*/
 
 Scheduler::Scheduler() {
-  assert(false);
+  // assert(false);
   Console::puts("Constructed Scheduler.\n");
 }
 
@@ -55,13 +55,16 @@ void Scheduler::yield() {
 }
 
 void Scheduler::resume(Thread * _thread) {
-  assert(false);
+  // assert(false);
+	ready_queue.enqueue(_thread);
 }
 
 void Scheduler::add(Thread * _thread) {
-  assert(false);
+  // assert(false);
+	ready_queue.enqueue(_thread)
 }
 
 void Scheduler::terminate(Thread * _thread) {
-  assert(false);
+  // assert(false);
+	delete _thread;
 }
