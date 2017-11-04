@@ -20,7 +20,7 @@
 /*--------------------------------------------------------------------------*/
 
 #include "thread.H"
-#include "queue.H"
+// #include "queue.H"
 
 /*--------------------------------------------------------------------------*/
 /* !!! IMPLEMENTATION HINT !!! */
@@ -54,6 +54,36 @@
 /*--------------------------------------------------------------------------*/
 /* SCHEDULER */
 /*--------------------------------------------------------------------------*/
+class Node {
+
+public:
+  Thread* thread;
+  Node* next_node;
+  Node* previous_node;
+
+public:
+  Node ();
+  Node (Thread* _thread);
+  Node (Node& _node);
+};
+
+
+class Queue {
+
+private:
+  int size;
+  Node* head;
+  Node* tail;
+
+public:
+  Queue ();
+  int get_size();
+  bool is_empty();
+  void enqueue (Thread* _thread);
+  Thread* dequeue ();
+  Thread* front ();
+};
+
 
 class Scheduler {
 
