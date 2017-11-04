@@ -54,7 +54,7 @@ void Scheduler::yield() {
   // assert(false);
 	Thread* next_thread = ready_queue.dequeue();
 	if (next_thread == NULL) {
-		Console.puts("Error getting next thread!!!\n");
+		Console::puts("Error getting next thread!!!\n");
 		while (true);
 	}
 	else {
@@ -69,7 +69,7 @@ void Scheduler::resume(Thread * _thread) {
 
 void Scheduler::add(Thread * _thread) {
   // assert(false);
-	ready_queue.enqueue(_thread)
+	ready_queue.enqueue(_thread);
 }
 
 void Scheduler::terminate(Thread * _thread) {

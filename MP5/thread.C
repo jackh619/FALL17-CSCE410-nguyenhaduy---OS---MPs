@@ -30,21 +30,19 @@
 
 #include "assert.H"
 #include "console.H"
-
 #include "frame_pool.H"
-
 #include "thread.H"
-
 #include "threads_low.H"
+#include "scheduler.H"
 
 /*--------------------------------------------------------------------------*/
 /* EXTERNS */
 /*--------------------------------------------------------------------------*/
 
 Thread * current_thread = 0;
-extern Scheduler * SYSTEM_SCHEDULER;
 /* Pointer to the currently running thread. This is used by the scheduler,
    for example. */
+extern Scheduler* SYSTEM_SCHEDULER;
 
 /* -------------------------------------------------------------------------*/
 /* LOCAL DATA PRIVATE TO THREAD AND DISPATCHER CODE */

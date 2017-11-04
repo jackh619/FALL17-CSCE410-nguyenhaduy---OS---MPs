@@ -28,7 +28,7 @@
 
 class Node {
 
-private:
+public:
   Thread* thread;
   Node* next_node;
   Node* previous_node;
@@ -80,7 +80,7 @@ public:
   }
 
   void enqueue (Thread* _thread) {
-    Node new_node = new Node (_thread);
+    Node* new_node = new Node (_thread);
     tail->next_node = new_node;
     tail = new_node;
     ++size;
@@ -94,16 +94,16 @@ public:
     Node* temp = head;
     head = head->next_node;
     --size;
-    return temp;
+    return temp->thread;
   }
 
   Thread* front () {
     if (size == 0) {
       return NULL;
     }
-    return head;
+    return head->thread;
   }
-}
+};
 	
 
 #endif
