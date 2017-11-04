@@ -51,7 +51,15 @@ Scheduler::Scheduler() {
 }
 
 void Scheduler::yield() {
-  assert(false);
+  // assert(false);
+	Thread* next_thread = ready_queue.dequeue();
+	if (next_thread == NULL) {
+		Console.puts("Error getting next thread!!!\n");
+		while (true);
+	}
+	else {
+		Thread::dispatch_to (next_thread);
+	}
 }
 
 void Scheduler::resume(Thread * _thread) {
