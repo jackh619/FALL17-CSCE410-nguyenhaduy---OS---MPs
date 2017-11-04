@@ -70,7 +70,7 @@ public:
 
 class Queue {
 
-private:
+public:
   int size;
   Node* head;
   Node* tail;
@@ -88,6 +88,7 @@ public:
 class Scheduler {
 
   /* The scheduler may need private members... */
+private:
   Queue ready_queue;
   
 public:

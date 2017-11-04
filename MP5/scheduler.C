@@ -90,7 +90,6 @@ void Queue::enqueue (Thread* _thread) {
     }
     else {
       	tail->next_node = new_node;      	
-    	Console::puts("Add new thread to end of queue!\n");
     }    
     tail = new_node;
     // return;
@@ -131,21 +130,37 @@ void Scheduler::yield() {
 		while (true);
 	}
 	else {
+    	Console::puts("Yeild to next thread in the queue!\n");
 		Thread::dispatch_to (next_thread);
 	}
 }
 
 void Scheduler::resume(Thread * _thread) {
   // assert(false);
+    Console::puts("Resume to a thread in the queue!\n");
 	ready_queue.enqueue(_thread);
 }
 
 void Scheduler::add(Thread * _thread) {
   // assert(false);
+    Console::puts("Add new thread to end of queue!\n");
 	ready_queue.enqueue(_thread);
 }
 
 void Scheduler::terminate(Thread * _thread) {
   // assert(false);
-	delete _thread;
+	Console::puts("Terminated a thread!!!\n");
+	Node* temp_node = ready_queue.head;
+
+	for (int i = 0; i < ready_queue.size; ++i) {
+		if (temp_node->thread == _thread) {
+			temp_node->previous_node->next_node = temp_node->next_node;
+			temp_node->next_node->previous_node = temp_node->previous_node;
+			--ready_queue.size;
+			delete _thread; 
+			break;
+		}
+		temp_node = temp_node->next_node;
+
+	}
 }

@@ -33,7 +33,7 @@
 
 /* -- UNCOMMENT THE FOLLOWING LINE TO MAKE THREADS TERMINATING */
 
-//#define _TERMINATING_FUNCTIONS_
+#define _TERMINATING_FUNCTIONS_
 /* This macro is defined when we want the thread functions to return, and so
    terminate their thread.
    Otherwise, the thread functions don't return, and the threads run forever.
@@ -143,7 +143,7 @@ void fun1() {
     Console::puts("FUN 1 INVOKED!\n");
 
 #ifdef _TERMINATING_FUNCTIONS_
-    for(int j = 0; j < 10; j++) 
+    for(int j = 0; j < 500; j++) 
 #else
     for(int j = 0;; j++) 
 #endif
@@ -162,7 +162,7 @@ void fun2() {
     Console::puts("FUN 2 INVOKED!\n");
 
 #ifdef _TERMINATING_FUNCTIONS_
-    for(int j = 0; j < 10; j++) 
+    for(int j = 0; j < 500; j++) 
 #else
     for(int j = 0;; j++) 
 #endif  

@@ -43,6 +43,7 @@ Thread * current_thread = 0;
 /* Pointer to the currently running thread. This is used by the scheduler,
    for example. */
 extern Scheduler* SYSTEM_SCHEDULER;
+extern MemPool* MEMORY_POOL;
 
 /* -------------------------------------------------------------------------*/
 /* LOCAL DATA PRIVATE TO THREAD AND DISPATCHER CODE */
@@ -76,8 +77,19 @@ static void thread_shutdown() {
     /* Let's not worry about it for now. 
        This means that we should have non-terminating thread functions. 
     */
+    // if (Machine::interrupts_enabled())
+    //     Machine::disable_interrupts();
+    SYSTEM_SCHEDULER->resume(current_thread);
+    // Delete the thread from the ready queue 
     SYSTEM_SCHEDULER->terminate(Thread::CurrentThread());
-    delete current_thread;
+
+    // releasing memory
+    MEMORY_POOL->release((unsigned long)(current_thread->get_stack_address()));
+    MEMORY_POOL->release((unsigned long)current_thread);
+
+    current_thread = 0;
+
+    // yield to another thread
     SYSTEM_SCHEDULER->yield();
 }
 
@@ -212,3 +224,8 @@ Thread * Thread::CurrentThread() {
 /* Return the currently running thread. */
     return current_thread;
 }
+
+char* Thread::get_stack_address(){
+    return stack;
+}
+
