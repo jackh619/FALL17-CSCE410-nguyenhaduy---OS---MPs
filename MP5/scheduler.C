@@ -118,12 +118,15 @@ Thread* Queue::front () {
 }
 
 Scheduler::Scheduler() {
-  // assert(false);
-  Console::puts("Constructed Scheduler.\n");
+  	// assert(false);
+  	Console::puts("Constructed Scheduler.\n");
 }
 
 void Scheduler::yield() {
   // assert(false);
+	if (Machine::interrupts_enabled())
+		Machine::disable_interrupts();
+
 	Thread* next_thread = ready_queue.dequeue();
 	if (next_thread == NULL) {
 		Console::puts("Error getting next thread!!!\n");
@@ -133,34 +136,59 @@ void Scheduler::yield() {
     	Console::puts("Yeild to next thread in the queue!\n");
 		Thread::dispatch_to (next_thread);
 	}
+	
+	if (!Machine::interrupts_enabled())
+		Machine::enable_interrupts();
+	return;
 }
 
 void Scheduler::resume(Thread * _thread) {
   // assert(false);
+	if (Machine::interrupts_enabled())
+		Machine::disable_interrupts();
+
     Console::puts("Resume to a thread in the queue!\n");
 	ready_queue.enqueue(_thread);
+
+	if (!Machine::interrupts_enabled())
+		Machine::enable_interrupts();
+	return;
 }
 
 void Scheduler::add(Thread * _thread) {
   // assert(false);
+	if (Machine::interrupts_enabled())
+		Machine::disable_interrupts();
+
     Console::puts("Add new thread to end of queue!\n");
 	ready_queue.enqueue(_thread);
+
+	if (!Machine::interrupts_enabled())
+		Machine::enable_interrupts();
+	return;
 }
 
 void Scheduler::terminate(Thread * _thread) {
   // assert(false);
+	if (Machine::interrupts_enabled())
+		Machine::disable_interrupts();
+
 	Console::puts("Terminated a thread!!!\n");
 	Node* temp_node = ready_queue.head;
 
-	for (int i = 0; i < ready_queue.size; ++i) {
+	while (temp_node != NULL) {
 		if (temp_node->thread == _thread) {
 			temp_node->previous_node->next_node = temp_node->next_node;
 			temp_node->next_node->previous_node = temp_node->previous_node;
 			--ready_queue.size;
 			delete _thread; 
-			break;
+			// break;
 		}
 		temp_node = temp_node->next_node;
-
 	}
+
+	if (!Machine::interrupts_enabled())
+		Machine::enable_interrupts();
+
+	return;
 }
