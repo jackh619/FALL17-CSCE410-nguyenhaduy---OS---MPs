@@ -64,7 +64,6 @@ public:
 public:
   Node ();
   Node (Thread* _thread);
-  Node (Node& _node);
 };
 
 
@@ -77,11 +76,8 @@ public:
 
 public:
   Queue ();
-  int get_size();
-  bool is_empty();
   void enqueue (Thread* _thread);
   Thread* dequeue ();
-  Thread* front ();
 };
 
 

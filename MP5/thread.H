@@ -87,6 +87,8 @@ public:
        yet. */
 
     char* get_stack_address();
+
+    int get_thread_id ();
 };
 
 #endif
