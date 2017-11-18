@@ -22,6 +22,8 @@
 /*--------------------------------------------------------------------------*/
 
 #include "simple_disk.H"
+#include "interrupts.H"
+#include "scheduler.H"
 
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */ 
@@ -34,6 +36,13 @@
 /*--------------------------------------------------------------------------*/
 
 class BlockingDisk : public SimpleDisk {
+
+private:
+
+	static int head;
+	static int tail;
+	static Thread* block_queue[MAX_THREADS];
+
 public:
    BlockingDisk(DISK_ID _disk_id, unsigned int _size); 
    /* Creates a BlockingDisk device with the given size connected to the 
