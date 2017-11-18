@@ -22,7 +22,14 @@
 #include "utils.H"
 #include "console.H"
 #include "blocking_disk.H"
+#include "scheduler.H"
 #include "machine.H"
+
+/*--------------------------------------------------------------------------*/
+/* EXTERNS */
+/*--------------------------------------------------------------------------*/
+
+extern Scheduler* SYSTEM_SCHEDULER;
 
 /*--------------------------------------------------------------------------*/
 /* CONSTRUCTOR */
@@ -65,7 +72,7 @@ void BlockingDisk::read(unsigned long _block_no, unsigned char * _buf) {
 	// after the I/O operation is done
 	// dequeue the thread in the block queue
 	// dequeue the disk in the disk queue
-	head = block_queue.dequeue();
+	block_queue.dequeue();
 
 }
 
@@ -74,14 +81,14 @@ void BlockingDisk::write(unsigned long _block_no, unsigned char * _buf) {
   while (write_lock) {}   //wait other threads to finish writing
 	write_lock = true;   //set the lock
 	
-	// register the thread that is to block as well as the corresponding disk
+	// Register a new thread to the block_thread queue
 	block_queue.enqueue(Thread::CurrentThread());
 
 
 	// tell the disk the thread is about to apply I/O operation
 	issue_operation(WRITE, _block_no);
 	
-	// any time the thread gains CPU, it checks if the disk is ready
+	// If disk thread gains CPU access, check if the disk is ready
 	// If the disk is not ready, yield the CPU to other threads
 	while (!is_ready()) {
 		SYSTEM_SCHEDULER->resume(Thread::CurrentThread());
@@ -98,26 +105,7 @@ void BlockingDisk::write(unsigned long _block_no, unsigned char * _buf) {
 	// after the I/O operation is done
 	// dequeue the thread in the block queue
 	// dequeue the disk in the disk queue
-	head = block_queue.dequeue();
+	block_queue.dequeue();
 
 	write_lock = false;   //free the lock
-}
-
-
-void BlockingDisk::interrupt_handler(REGS* _regs) {
-	if (SYSTEM_SCHEDULER->lock) {
-		return;
-	}
-	// whenever the disk is ready to have I/O operation, this interrupt is trigerred
-	Thread* thread_to_active = block_queue[head];
-	Thread* thread_to_active = block_queue.front();
-	
-	if (thread_to_active == Thread::CurrentThread()) {
-		// if this is the case, simply return and do no operations
-		return;
-	}
-	else {
-		SYSTEM_SCHEDULER->preempt(thread_to_active);
-		return;
-	}
 }

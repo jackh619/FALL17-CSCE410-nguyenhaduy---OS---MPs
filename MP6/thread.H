@@ -85,6 +85,10 @@ public:
     static Thread * CurrentThread();
     /* Returns the currently running thread. NULL if no thread has started 
        yet. */
+
+    char* get_stack_address();
+
+    int get_thread_id ();
 };
 
 #endif

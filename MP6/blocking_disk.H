@@ -23,6 +23,7 @@
 
 #include "simple_disk.H"
 #include "interrupts.H"
+#include "thread.H"
 #include "scheduler.H"
 
 /*--------------------------------------------------------------------------*/
@@ -58,7 +59,6 @@ public:
 
    virtual void write(unsigned long _block_no, unsigned char * _buf);
    /* Writes 512 Bytes from the buffer to the given block on the disk. */
-
 };
 
 #endif
