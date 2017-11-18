@@ -39,9 +39,8 @@ class BlockingDisk : public SimpleDisk {
 
 private:
 
-	static int head;
-	static int tail;
-	static Thread* block_queue[MAX_THREADS];
+	Queue block_queue;
+	bool write_lock;
 
 public:
    BlockingDisk(DISK_ID _disk_id, unsigned int _size); 
