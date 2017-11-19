@@ -78,7 +78,7 @@ public:
   Queue ();
   void enqueue (Thread* _thread);
   Thread* dequeue ();
-  Thread* front();
+  Thread* front ();
 };
 
 

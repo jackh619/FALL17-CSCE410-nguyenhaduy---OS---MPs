@@ -23,7 +23,6 @@
 
 #include "simple_disk.H"
 #include "interrupts.H"
-#include "thread.H"
 #include "scheduler.H"
 
 /*--------------------------------------------------------------------------*/
@@ -40,8 +39,8 @@ class BlockingDisk : public SimpleDisk {
 
 private:
 
-	Queue block_queue;
-	bool write_lock;
+	static Queue block_queue;
+	static bool write_lock;
 
 public:
    BlockingDisk(DISK_ID _disk_id, unsigned int _size); 
@@ -59,6 +58,9 @@ public:
 
    virtual void write(unsigned long _block_no, unsigned char * _buf);
    /* Writes 512 Bytes from the buffer to the given block on the disk. */
+
+   static void interrupt_handler(REGS* _regs);
+
 };
 
 #endif

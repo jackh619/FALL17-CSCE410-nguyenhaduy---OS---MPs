@@ -22,7 +22,6 @@
 #include "utils.H"
 #include "console.H"
 #include "blocking_disk.H"
-#include "scheduler.H"
 #include "machine.H"
 
 /*--------------------------------------------------------------------------*/
@@ -30,6 +29,9 @@
 /*--------------------------------------------------------------------------*/
 
 extern Scheduler* SYSTEM_SCHEDULER;
+
+Queue BlockingDisk::block_queue;
+bool BlockingDisk::write_lock = false;
 
 /*--------------------------------------------------------------------------*/
 /* CONSTRUCTOR */
@@ -39,7 +41,6 @@ extern Scheduler* SYSTEM_SCHEDULER;
 
 BlockingDisk::BlockingDisk(DISK_ID _disk_id, unsigned int _size) 
   : SimpleDisk(_disk_id, _size) {
-  	write_lock = false;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -47,18 +48,28 @@ BlockingDisk::BlockingDisk(DISK_ID _disk_id, unsigned int _size)
 /*--------------------------------------------------------------------------*/
 
 void BlockingDisk::read(unsigned long _block_no, unsigned char * _buf) {
-  	// register the thread that is to block as well as the corresponding disk number
-	block_queue.enqueue(Thread::CurrentThread());
+
+	Thread* current_thread = Thread::CurrentThread();
 	
-	// tell the disk the thread is about to apply I/O operation
+	// Register a new thread to the block_thread queue
+	block_queue.enqueue(current_thread);
+	
+	// Issue read disk operation
 	issue_operation(READ, _block_no);
 	
-	// any time the thread gains CPU, it checks if the disk is ready
-	while (!is_ready()) {
-		// if not, gives up CPU and wait
-		SYSTEM_SCHEDULER->resume(Thread::CurrentThread());
-		SYSTEM_SCHEDULER->yield();
-	}
+	// If disk thread gains CPU access, check if the disk is ready
+	// If the disk is not ready, yield the CPU to other threads
+	// while (!is_ready()) {
+	// 	// if not, gives up CPU and wait
+	// 	if (block_queue.size != 0) {
+	// 		SYSTEM_SCHEDULER->resume(Thread::CurrentThread());
+	// 		Thread* target = block_queue.dequeue();
+	// 		SYSTEM_SCHEDULER->resume(target);
+	// 		SYSTEM_SCHEDULER->yield();
+
+	// 	}
+
+	// }
 	
 	// if yes, apply I/O operation;
 	int i;
@@ -78,20 +89,19 @@ void BlockingDisk::read(unsigned long _block_no, unsigned char * _buf) {
 
 
 void BlockingDisk::write(unsigned long _block_no, unsigned char * _buf) {
-  while (write_lock) {}   //wait other threads to finish writing
-	write_lock = true;   //set the lock
+
+	Thread* current_thread = Thread::CurrentThread();
 	
 	// Register a new thread to the block_thread queue
-	block_queue.enqueue(Thread::CurrentThread());
+	block_queue.enqueue(current_thread);
 
-
-	// tell the disk the thread is about to apply I/O operation
+	// Issue write disk operation
 	issue_operation(WRITE, _block_no);
 	
 	// If disk thread gains CPU access, check if the disk is ready
 	// If the disk is not ready, yield the CPU to other threads
 	while (!is_ready()) {
-		SYSTEM_SCHEDULER->resume(Thread::CurrentThread());
+		SYSTEM_SCHEDULER->add(current_thread);
 		SYSTEM_SCHEDULER->yield();
 	}
 	
@@ -107,5 +117,26 @@ void BlockingDisk::write(unsigned long _block_no, unsigned char * _buf) {
 	// dequeue the disk in the disk queue
 	block_queue.dequeue();
 
-	write_lock = false;   //free the lock
+	// write_lock = false;   //free the lock
+}
+
+
+void BlockingDisk::interrupt_handler(REGS* _regs) {
+	if (!Machine::interrupts_enabled()) {
+		return;
+	}
+
+	// whenever the disk is ready to have I/O operation, this interrupt is trigerred
+	Thread* thread_to_active = block_queue.front();
+	
+	if (thread_to_active == Thread::CurrentThread()) {
+		// if this is the case, simply return and do no operations
+		return;
+	}
+	else {
+		// SYSTEM_SCHEDULER->preempt(thread_to_active);
+		SYSTEM_SCHEDULER->add(Thread::CurrentThread());
+		Thread::dispatch_to(thread_to_active);
+		return;
+	}
 }
