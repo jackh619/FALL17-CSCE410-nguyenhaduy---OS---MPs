@@ -288,8 +288,8 @@ int main() {
     /* -- DISK DEVICE -- */
 
     // SYSTEM_DISK = new SimpleDisk(MASTER, SYSTEM_DISK_SIZE);
-    // SYSTEM_DISK = new BlockingDisk(MASTER, SYSTEM_DISK_SIZE);
-    SYSTEM_DISK = new MirroredDisk(MASTER, SLAVE, SYSTEM_DISK_SIZE);
+    SYSTEM_DISK = new BlockingDisk(MASTER, SYSTEM_DISK_SIZE);
+    // SYSTEM_DISK = new MirroredDisk(MASTER, SLAVE, SYSTEM_DISK_SIZE);
    
     /* NOTE: The timer chip starts periodically firing as 
              soon as we enable interrupts.
