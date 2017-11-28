@@ -71,11 +71,7 @@ private:
   DISK_ID master_disk_id;
   DISK_ID slave_disk_id;
 
-  bool master_ready;
-  bool slave_ready;
-
   SimpleDisk* SLAVE_DISK;
-  SimpleDisk* MASTER_DISK;
 
 public:
 

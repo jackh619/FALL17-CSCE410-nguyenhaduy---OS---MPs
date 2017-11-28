@@ -147,7 +147,6 @@ MirroredDisk::MirroredDisk(DISK_ID _disk_id_master, DISK_ID _disk_id_slave, unsi
 	master_disk_id = _disk_id_master;
 	slave_disk_id = _disk_id_slave;
  
-	MASTER_DISK = this;
 	SLAVE_DISK = new SimpleDisk(slave_disk_id, _size);
 }
 
@@ -158,8 +157,9 @@ MirroredDisk::MirroredDisk(DISK_ID _disk_id_master, DISK_ID _disk_id_slave, unsi
 void MirroredDisk::read(unsigned long _block_no, unsigned char * _buf) {
 
 	// Issue read disk operation
+	disk_id = master_disk_id;
 	issue_operation(READ, _block_no);
-	
+
 	bool cont = true; // Boolean variable to continue the loop
 
 	// Get the current disk accessing thread 
@@ -171,21 +171,26 @@ void MirroredDisk::read(unsigned long _block_no, unsigned char * _buf) {
 
 	// If disk thread gains CPU access, check if the disk is ready
 	// If the disk is not ready, yield the CPU to other threads
-	while (!is_ready()) {
+	while ((!is_ready() || SLAVE_DISK->is_ready()) && cont) {
 		current_thread = Thread::CurrentThread();
 
-		// if (block_queue.front() != NULL) {
-		// 	// If current thread is in front of queue, stop the loop
-		// 	if (current_thread->get_thread_id() == block_queue.front()->get_thread_id()) {
-		// 		cont = false;
-		// 	}
-		// 	// If the disk is ready but the thread is not in front queue, continue to yeild
-		// 	else {
-		// 		cont = true;
-		// 		SYSTEM_SCHEDULER->resume(current_thread);
-		// 		SYSTEM_SCHEDULER->yield();	
-		// 	}
-		// }		
+		if (master_block_queue.front() != NULL && slave_block_queue.front() != NULL) {
+
+			int current_thread_id = current_thread->get_thread_id();
+			int master_thread_id = master_block_queue.front()->get_thread_id();
+			int slave_thread_id = slave_block_queue.front()->get_thread_id();
+			
+			// If current thread is in front of queue, stop the loop
+			if (current_thread_id == master_thread_id || current_thread_id == slave_thread_id) {
+				cont = false;
+			}
+			// If the disk is ready but the thread is not in front queue, continue to yeild
+			else {
+				cont = true;
+				SYSTEM_SCHEDULER->resume(current_thread);
+				SYSTEM_SCHEDULER->yield();	
+			}
+		}		
 	}
 	
 	// Delete the current thread from the block_thread queue
@@ -193,8 +198,18 @@ void MirroredDisk::read(unsigned long _block_no, unsigned char * _buf) {
 	slave_block_queue.dequeue();
 	
 	// If the disk is ready, process I/O reading operation;
+	disk_id = master_disk_id;
 	int i;
 	unsigned short tmpw;
+	for (i = 0; i < 256; i++) {
+		tmpw = Machine::inportw(0x1F0);
+		_buf[i*2]   = (unsigned char)tmpw;
+		_buf[i*2+1] = (unsigned char)(tmpw >> 8);
+	}
+
+	disk_id = slave_disk_id;
+	issue_operation(READ, _block_no);
+
 	for (i = 0; i < 256; i++) {
 		tmpw = Machine::inportw(0x1F0);
 		_buf[i*2]   = (unsigned char)tmpw;
@@ -205,7 +220,8 @@ void MirroredDisk::read(unsigned long _block_no, unsigned char * _buf) {
 
 void MirroredDisk::write(unsigned long _block_no, unsigned char * _buf) {
 
-	// Issue write disk operation
+	// Issue read disk operation
+	disk_id = master_disk_id;
 	issue_operation(WRITE, _block_no);
 	
 	bool cont = true; // Boolean variable to continue the loop
@@ -219,21 +235,26 @@ void MirroredDisk::write(unsigned long _block_no, unsigned char * _buf) {
 
 	// If disk thread gains CPU access, check if the disk is ready
 	// If the disk is not ready, yield the CPU to other threads
-	while (!is_ready()) {
+	while ((!is_ready() && SLAVE_DISK->is_ready()) && cont) {
 		current_thread = Thread::CurrentThread();
 
-		// if (block_queue.front() != NULL) {
-		// 	// If current thread is in front of queue, stop the loop
-		// 	if (current_thread->get_thread_id() == block_queue.front()->get_thread_id()) {
-		// 		cont = false;
-		// 	}
-		// 	// If the disk is ready but the thread is not in front queue, continue to yeild
-		// 	else {
-		// 		cont = true;
-		// 		SYSTEM_SCHEDULER->resume(current_thread);
-		// 		SYSTEM_SCHEDULER->yield();	
-		// 	}
-		// }		
+		if (master_block_queue.front() != NULL && slave_block_queue.front() != NULL) {
+
+			int current_thread_id = current_thread->get_thread_id();
+			int master_thread_id = master_block_queue.front()->get_thread_id();
+			int slave_thread_id = slave_block_queue.front()->get_thread_id();
+			
+			// If current thread is in front of queue, stop the loop
+			if (current_thread_id == master_thread_id && current_thread_id == slave_thread_id) {
+				cont = false;
+			}
+			// If the disk is ready but the thread is not in front queue, continue to yeild
+			else {
+				cont = true;
+				SYSTEM_SCHEDULER->resume(current_thread);
+				SYSTEM_SCHEDULER->yield();	
+			}
+		}		
 	}
 	
 	// Delete the current thread from the block_thread queue
@@ -241,8 +262,17 @@ void MirroredDisk::write(unsigned long _block_no, unsigned char * _buf) {
 	slave_block_queue.dequeue();
 
 	// If the disk is ready, process I/O writing operation;
+	disk_id = master_disk_id;
 	int i; 
 	unsigned short tmpw;
+	for (i = 0; i < 256; i++) {
+		tmpw = _buf[2*i] | (_buf[2*i+1] << 8);
+		Machine::outportw(0x1F0, tmpw);
+	}
+
+	disk_id = slave_disk_id;
+	issue_operation(WRITE, _block_no);
+
 	for (i = 0; i < 256; i++) {
 		tmpw = _buf[2*i] | (_buf[2*i+1] << 8);
 		Machine::outportw(0x1F0, tmpw);
