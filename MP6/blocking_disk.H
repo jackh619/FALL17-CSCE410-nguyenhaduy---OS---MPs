@@ -40,7 +40,6 @@ class BlockingDisk : public SimpleDisk {
 private:
 
 	static Queue block_queue;
-	static bool write_lock;
 
 public:
    BlockingDisk(DISK_ID _disk_id, unsigned int _size); 
@@ -59,8 +58,30 @@ public:
    virtual void write(unsigned long _block_no, unsigned char * _buf);
    /* Writes 512 Bytes from the buffer to the given block on the disk. */
 
-   static void interrupt_handler(REGS* _regs);
+};
 
+
+class MirroredDisk : public SimpleDisk {
+
+private:
+
+  static Queue master_block_queue;
+  static Queue slave_block_queue;
+  
+  DISK_ID master_disk_id;
+  DISK_ID slave_disk_id;
+
+  bool master_ready;
+  bool slave_ready;
+
+  SimpleDisk* SLAVE_DISK;
+  SimpleDisk* MASTER_DISK;
+
+public:
+
+  MirroredDisk(DISK_ID _disk_id_master, DISK_ID _disk_id_slave, unsigned int _size);
+  virtual void read(unsigned long _block_no, unsigned char* _buf);
+  virtual void write(unsigned long _block_no, unsigned char* _buf);
 };
 
 #endif
