@@ -171,7 +171,7 @@ void MirroredDisk::read(unsigned long _block_no, unsigned char * _buf) {
 
 	// If disk thread gains CPU access, check if the disk is ready
 	// If the disk is not ready, yield the CPU to other threads
-	while ((!is_ready() || SLAVE_DISK->is_ready()) && cont) {
+	while ((!is_ready() && !SLAVE_DISK->is_ready()) && cont) {
 		current_thread = Thread::CurrentThread();
 
 		if (master_block_queue.front() != NULL && slave_block_queue.front() != NULL) {
@@ -235,7 +235,7 @@ void MirroredDisk::write(unsigned long _block_no, unsigned char * _buf) {
 
 	// If disk thread gains CPU access, check if the disk is ready
 	// If the disk is not ready, yield the CPU to other threads
-	while ((!is_ready() && SLAVE_DISK->is_ready()) && cont) {
+	while ((!is_ready() || !SLAVE_DISK->is_ready()) && cont) {
 		current_thread = Thread::CurrentThread();
 
 		if (master_block_queue.front() != NULL && slave_block_queue.front() != NULL) {
