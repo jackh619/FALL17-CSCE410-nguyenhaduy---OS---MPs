@@ -29,12 +29,14 @@
 /*--------------------------------------------------------------------------*/
 
 #include "assert.H"
+#include "utils.H"
 #include "console.H"
+
 #include "frame_pool.H"
+
 #include "thread.H"
+
 #include "threads_low.H"
-#include "scheduler.H"
-#include "mem_pool.H"
 
 /*--------------------------------------------------------------------------*/
 /* EXTERNS */
@@ -43,8 +45,6 @@
 Thread * current_thread = 0;
 /* Pointer to the currently running thread. This is used by the scheduler,
    for example. */
-extern Scheduler* SYSTEM_SCHEDULER;
-extern MemPool* MEMORY_POOL;
 
 /* -------------------------------------------------------------------------*/
 /* LOCAL DATA PRIVATE TO THREAD AND DISPATCHER CODE */
@@ -74,36 +74,16 @@ static void thread_shutdown() {
        This is a bit complicated because the thread termination interacts with the scheduler.
      */
 
-    // assert(false);
+    assert(false);
     /* Let's not worry about it for now. 
        This means that we should have non-terminating thread functions. 
     */
-
-    // Delete the thread from the ready queue 
-    SYSTEM_SCHEDULER->terminate(Thread::CurrentThread());
-
-    if (Machine::interrupts_enabled())
-        Machine::disable_interrupts();
-
-    // Release memory
-    MEMORY_POOL->release((unsigned long)(current_thread->get_stack_address()));
-    MEMORY_POOL->release((unsigned long)current_thread);
-
-    current_thread = 0;
-    
-    if (!Machine::interrupts_enabled())
-        Machine::enable_interrupts();
-
-    // Yield to another thread
-    SYSTEM_SCHEDULER->yield();
 }
 
 static void thread_start() {
      /* This function is used to release the thread for execution in the ready queue. */
     
      /* We need to add code, but it is probably nothing more than enabling interrupts. */
-    if (!Machine::interrupts_enabled())
-        Machine::enable_interrupts();
 }
 
 void Thread::setup_context(Thread_Function _tfunction){
@@ -117,9 +97,6 @@ void Thread::setup_context(Thread_Function _tfunction){
     /* -- HERE WE PUSH THE ITEMS ON THE STACK THAT ARE NEEDED FOR THE
           THREAD TO START EXECUTION AND FOR IT TO TERMINATE CORRECTLY
           WHEN THE THREAD FUNCTION RETURNS. */
-
-    // if (Machine::interrupts_enabled())
-    //     Machine::disable_interrupts();
 
     /* ---- ARGUMENT TO THREAD FUNCTION */
     push(0); /* At this point we don't have arguments. */
@@ -177,10 +154,6 @@ void Thread::setup_context(Thread_Function _tfunction){
     Console::puts("esp = "); Console::putui((unsigned int)esp); Console::puts("\n");
 
     Console::puts("done\n");
-
-    // if (!Machine::interrupts_enabled())
-    //     Machine::enable_interrupts();
-
 }
 
 /*--------------------------------------------------------------------------*/
@@ -226,13 +199,9 @@ void Thread::dispatch_to(Thread * _thread) {
 */
 
     /* The value of 'current_thread' is modified inside 'threads_low_switch_to()'. */
-    if (Machine::interrupts_enabled())
-        Machine::disable_interrupts();
-    
+
     threads_low_switch_to(_thread);
 
-    if (!Machine::interrupts_enabled())
-        Machine::enable_interrupts();
     /* The call does not return until after the thread is context-switched back in. */
 }
        
@@ -249,4 +218,3 @@ char* Thread::get_stack_address() {
 int Thread::get_thread_id () {
     return thread_id;
 }
-

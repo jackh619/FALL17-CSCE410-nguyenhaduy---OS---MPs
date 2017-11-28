@@ -1,7 +1,7 @@
 /*
  File: scheduler.C
  
- Author:
+ Author: 
  Date  :
  
  */
@@ -48,46 +48,52 @@
 Node::Node () {
     thread = NULL;
     next_node = NULL;
-    previous_node = NULL;
 }
 
 Node::Node (Thread* _thread) {
     thread = _thread;
     next_node = NULL;
-    previous_node = NULL;
 }
 
 Queue::Queue () {
     size = 0;
-    head = NULL;
-    tail = NULL;
+    head = 0;
+    tail = 0;
 }
 
 void Queue::enqueue (Thread* _thread) {
     Node* new_node = new Node (_thread);
-    new_node->next_node = NULL;
     ++size;
-    if (head == NULL) {
+    if (head == NULL && tail == NULL) {
       	head = new_node;
+        tail = new_node;       
     	Console::puts("Create head of queue!\n");
     }
     else {
-      	tail->next_node = new_node;      	
-    }    
-    tail = new_node;
+        tail->next_node = new_node;
+        tail = new_node;
+    }
+
     return;
+
 }
 
 Thread* Queue::dequeue () {
     if (head == NULL){
     	Console::puts("Cannot dequeue an empty queue\n");
+        return NULL;
+    }
+
+    if (head == tail){
+        head = tail = NULL;
+        return NULL;
     }
     else {
     	Node* temp = head;
-    	head = head->next_node;
+    	head = temp->next_node;
     	Thread* thread = temp->thread;
     	delete temp;
-    	--size;    	
+    	--size;
     	return thread;
     }    
     return NULL;
@@ -116,6 +122,9 @@ void Scheduler::yield() {
 
 	Thread* next_thread = ready_queue.dequeue();
 
+    // if (!Machine::interrupts_enabled())
+    //     Machine::enable_interrupts();
+
 	if (next_thread == NULL) {
 		Console::puts("Error getting next thread!!!\n");
 		while (true);
@@ -124,9 +133,6 @@ void Scheduler::yield() {
     	Console::puts("Yeild to next thread in the queue!\n");
 		Thread::dispatch_to (next_thread);
 	}
-	
-	// if (!Machine::interrupts_enabled())
-	// 	Machine::enable_interrupts();
 
 	return;
 }
@@ -160,23 +166,23 @@ void Scheduler::add(Thread * _thread) {
 }
 
 void Scheduler::terminate(Thread * _thread) {
-  // assert(false);
+  assert(false);
 	// if (Machine::interrupts_enabled())
 	// 	Machine::disable_interrupts();
 
-	Node* temp_node = ready_queue.head;
+	// Node* temp_node = ready_queue.head;
 
-	while (temp_node != NULL) {
-		if (temp_node->thread->get_thread_id() == _thread->get_thread_id()) {
-			temp_node->previous_node->next_node = temp_node->next_node;
-			temp_node->next_node->previous_node = temp_node->previous_node;
-			--ready_queue.size;
-			delete _thread; 
-			Console::puts("Terminated a thread!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-			// break;
-		}
-		temp_node = temp_node->next_node;
-	}
+	// while (temp_node != NULL) {
+	// 	if (temp_node->thread->get_thread_id() == _thread->get_thread_id()) {
+	// 		temp_node->previous_node->next_node = temp_node->next_node;
+	// 		temp_node->next_node->previous_node = temp_node->previous_node;
+	// 		--ready_queue.size;
+	// 		delete _thread; 
+	// 		Console::puts("Terminated a thread!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+	// 		// break;
+	// 	}
+	// 	temp_node = temp_node->next_node;
+	// }
 
 	// Console::puts("Terminated a thread!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 

@@ -52,9 +52,9 @@
 #include "scheduler.H"      /* WE WILL NEED A SCHEDULER WITH BlockingDisk */
 #endif
 
-// #include "simple_disk.H"    /* DISK DEVICE */
-                            /* YOU MAY NEED TO INCLUDE blocking_disk.H*/
 #include "blocking_disk.H"
+#include "simple_disk.H"    /* DISK DEVICE */
+                            /* YOU MAY NEED TO INCLUDE blocking_disk.H
 /*--------------------------------------------------------------------------*/
 /* MEMORY MANAGEMENT */
 /*--------------------------------------------------------------------------*/
@@ -287,7 +287,6 @@ int main() {
 
     /* -- DISK DEVICE -- */
 
-    // SYSTEM_DISK = new SimpleDisk(MASTER, SYSTEM_DISK_SIZE);
     SYSTEM_DISK = new BlockingDisk(MASTER, SYSTEM_DISK_SIZE);
    
     /* NOTE: The timer chip starts periodically firing as 
