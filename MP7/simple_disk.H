@@ -27,6 +27,7 @@
 /*--------------------------------------------------------------------------*/
 
 /* -- (none) -- */
+#include "scheduler.H"
 
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */ 
@@ -41,25 +42,25 @@
 /*--------------------------------------------------------------------------*/
 /* S i m p l e D i s k  */
 /*--------------------------------------------------------------------------*/
-
+extern Scheduler* SYSTEM_SCHEDULER;
 class SimpleDisk  {
 private:
      /* -- FUNCTIONALITY OF THE IDE LBA28 CONTROLLER */
 
-     DISK_ID      disk_id;            /* This disk is either MASTER or SLAVE */
-
-     unsigned int disk_size;          /* In Byte */
-
-     void issue_operation(DISK_OPERATION _op, unsigned long _block_no);
-     /* Send a sequence of commands to the controller to initialize the READ/WRITE 
-        operation. This operation is called by read() and write(). */ 
+unsigned int disk_size;  
+     
         
      
 protected:
      /* -- HERE WE CAN DEFINE THE BEHAVIOR OF DERIVED DISKS */ 
 
-     virtual bool is_ready();
-     /* Return true if disk is ready to transfer data from/to disk, false otherwise. */
+
+               DISK_ID      disk_id;            /* This disk is either MASTER or SLAVE */
+        static bool write_lock;
+     
+     void issue_operation(DISK_OPERATION _op, unsigned long _block_no);
+     /* Send a sequence of commands to the controller to initialize the READ/WRITE 
+        operation. This operation is called by read() and write(). */ 
 
      virtual void wait_until_ready() {
         while (!is_ready()) { /* wait */; }
@@ -93,6 +94,8 @@ public:
    virtual void write(unsigned long _block_no, unsigned char * _buf);
    /* Writes 512 Bytes from the buffer to the given block on the disk. */
 
+   virtual bool is_ready();
+   /* Return true if disk is ready to transfer data from/to disk, false otherwise. */
 };
 
 #endif

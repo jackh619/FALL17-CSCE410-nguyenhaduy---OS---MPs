@@ -28,10 +28,12 @@
 #include "console.H"
 #include "simple_disk.H"
 #include "machine.H"
+#include "scheduler.H"
 
 /*--------------------------------------------------------------------------*/
 /* CONSTRUCTOR */
 /*--------------------------------------------------------------------------*/
+extern Scheduler* SYSTEM_SCHEDULER;
 
 SimpleDisk::SimpleDisk(DISK_ID _disk_id, unsigned int _size) {
    disk_id   = _disk_id;

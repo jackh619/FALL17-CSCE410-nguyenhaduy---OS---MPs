@@ -210,3 +210,11 @@ Thread * Thread::CurrentThread() {
 /* Return the currently running thread. */
     return current_thread;
 }
+
+char* Thread::get_stack_address() {
+    return stack;
+}
+
+int Thread::get_thread_id () {
+    return thread_id;
+}
