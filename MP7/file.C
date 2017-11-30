@@ -33,6 +33,19 @@ File::File() {
     assert(false);
 }
 
+File::File(FileSystem* _file_system, SimpleDisk * _disk) {
+    Console::puts("In file constructor.\n");
+    file_id = 0;
+    file_size = 0;
+    inode_no = 0;
+    inode_size = 0;
+    cur_size = 0;
+    cur_block = 0; 
+    cur_position = 0;
+    file_system = _file_system;
+    disk = _disk;
+}
+
 /*--------------------------------------------------------------------------*/
 /* FILE FUNCTIONS */
 /*--------------------------------------------------------------------------*/

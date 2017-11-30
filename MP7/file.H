@@ -21,7 +21,8 @@
 /* INCLUDES */
 /*--------------------------------------------------------------------------*/
 
-/* -- (none) -- */
+#include "simple_disk.H"
+#include "file_system.H"
 
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */ 
@@ -38,12 +39,23 @@ class File  {
 private:
     /* -- your file data structures here ... */
     
+    unsigned int file_id;
+    unsigned int file_size;
+    unsigned int inode_no;
+    unsigned int inode_size;
+    unsigned int cur_block;
+    unsigned int cur_position;
+    unsigned int cur_size;
+    FileSystem* file_system;
+    SimpleDisk* disk;
     /* -- maybe it would be good to have a reference to the file system? */
     
 public:
 
     File(/* you may need arguments here; maybe a pointer to the disk block
           containing file management and file allocation data */);
+    
+    File(FileSystem* _file_system, SimpleDisk * _disk);
     /* Constructor for the file handle. Set the ’current
      position’ to be at the beginning of the file. */
     

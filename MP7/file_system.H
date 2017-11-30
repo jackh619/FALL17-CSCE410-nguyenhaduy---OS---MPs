@@ -18,7 +18,11 @@
 /* DEFINES */
 /*--------------------------------------------------------------------------*/
 
-/* -- (none) -- */
+#define BLOCK_SIZE 512
+#define MAX_FILE_SIZE 63
+#define SUPER_BLOCK_SIZE 1024
+#define BITMAP_SIZE 3072
+#define MAX_SYSTEM_SIZE 10485760
 
 /*--------------------------------------------------------------------------*/
 /* INCLUDES */
@@ -31,7 +35,27 @@
 /* DATA STRUCTURES */ 
 /*--------------------------------------------------------------------------*/
 
-/* -- (none) -- */
+static unsigned char buff[BLOCK_SIZE];
+static unsigned char temp[BLOCK_SIZE];
+static unsigned char temp1[BLOCK_SIZE];
+static unsigned char super_block_data[SUPER_BLOCK_SIZE];
+
+struct SuperBlock {
+    unsigned int fsize;
+    unsigned int inode_index;
+    unsigned int files_no[MAX_FILE_SIZE];
+    unsigned int files_size[MAX_FILE_SIZE];
+    unsigned int inode_no[MAX_FILE_SIZE];
+    unsigned int inode_size[MAX_FILE_SIZE];
+};
+
+
+struct I_Node {
+    unsigned int file_id;
+    unsigned int next_block;
+    unsigned int curr_size;
+    unsigned int blocks[125];
+};
 
 /*--------------------------------------------------------------------------*/
 /* FORWARD DECLARATIONS */ 
@@ -52,6 +76,11 @@ private:
      
      SimpleDisk * disk;
      unsigned int size;
+     unsigned char bitmap[BITMAP_SIZE];
+     File* files;
+     bool* file_locks;
+     unsigned int file_size;
+     unsigned int inode_index;
      
 public:
 
